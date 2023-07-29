@@ -401,14 +401,29 @@
           return;
         }
       });
+      const fs = require('fs');
+
       function handleGetRequest(url, req, resp) {
         if (url.pathname.startsWith('/health')) {
           sendResponse(resp, 200, 'health 200');
-        }
-        else if (url.pathname.startsWith('/')) {
-          sendResponse(resp, 200, 'hello world');
+        } else if (url.pathname.startsWith('/')) {
+          // 读取 index.html 文件内容
+          fs.readFile('index.html', 'utf8', (err, data) => {
+            if (err) {
+              console.error('Error reading file:', err);
+              sendResponse(resp, 500, 'Internal Server Error');
+            } else {
+              sendResponse(resp, 200, data);
+            }
+          });
         }
       }
+      
+      function sendResponse(resp, statusCode, body) {
+        resp.writeHead(statusCode, { 'Content-Type': 'text/html' });
+        resp.end(body);
+      }
+      
       function isUserAgentMozilla(req) {
         return req.headers['user-agent'].includes('Mozilla/5.0') && req.headers.upgrade !== 'websocket';
       }
